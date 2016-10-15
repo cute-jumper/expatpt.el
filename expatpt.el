@@ -48,73 +48,97 @@
 ;; ----------- ;;
 
 (defun expatpt-int ()
-  (parsec-collect-as-string
+  (parsec-collect-s
    (parsec-optional
     (parsec-one-of ?+ ?-))
-   (parsec-many1-as-string (parsec-re "[0-9]"))))
+   (parsec-many1-s (parsec-digit))))
 
 (defun expatpt-decimal ()
-  (parsec-collect-as-string
+  (parsec-collect-s
    (expatpt-int)
    (parsec-optional
-    (parsec-collect-as-string
+    (parsec-collect-s
      (parsec-ch ?.)
      (expatpt-int)))))
 
 (defun expatpt-num ()
-  (parsec-collect-as-string
+  (parsec-collect-s
    (expatpt-decimal)
    (parsec-optional
-    (parsec-collect-as-string
+    (parsec-collect-s
      (parsec-ch ?e)
      (expatpt-int)))))
 
 (defun expatpt-operator ()
-  (parsec-collect-as-string
-   (parsec-many-as-string (parsec-ch ? ))
+  (parsec-collect-s
+   (parsec-many-s (parsec-ch ? ))
    (parsec-one-of ?+ ?- ?* ?/ ?^)
-   (parsec-many-as-string (parsec-ch ? ))))
+   (parsec-many-s (parsec-ch ? ))))
 
 (defun expatpt-open-paren ()
-  (parsec-collect-as-string
-   (parsec-many-as-string (parsec-ch ? ))
+  (parsec-collect-s
+   (parsec-many-s (parsec-ch ? ))
    (parsec-ch ?\()
-   (parsec-many-as-string (parsec-ch ? ))))
+   (parsec-many-s (parsec-ch ? ))))
 
 (defun expatpt-close-paren ()
-  (parsec-collect-as-string
-   (parsec-many-as-string (parsec-ch ? ))
+  (parsec-collect-s
+   (parsec-many-s (parsec-ch ? ))
    (parsec-ch ?\))
-   (parsec-many-as-string (parsec-ch ? ))))
+   (parsec-many-s (parsec-ch ? ))))
 
 (defun expatpt-exp ()
+  (parsec-many (parsec-ch ? ))
   (parsec-or
-   (parsec-collect-as-string
+   (parsec-collect-s
     (expatpt-open-paren)
-    (expatpt-expression)
+    (expatpt-parse)
     (expatpt-close-paren))
    (expatpt-num)))
 
-(defun expatpt-expression ()
-  (parsec-collect-as-string
+(defun expatpt-parse ()
+  (parsec-collect-s
    (expatpt-exp)
-   (parsec-many-as-string
+   (parsec-many-s
     (parsec-try
-     (parsec-collect-as-string
+     (parsec-collect-s
       (expatpt-operator)
       (expatpt-exp))))))
+
+(defun expatpt--around-internal ()
+  (let* ((beg (expatpt-find-beginning))
+         (exp (buffer-substring-no-properties
+               beg
+               (expatpt-find-ending)))
+         (res (parsec-with-input exp
+                (expatpt-parse))))
+    (unless (parsec-error-p res)
+      (list res beg (+ beg (length res))))))
 
 ;;;###autoload
 (defun expatpt-around ()
   (interactive)
-  (let* ((exp (buffer-substring-no-properties
-               (expatpt-find-beginning)
-               (expatpt-find-ending)))
-         (res (parsec-with-input exp
-                (parsec-return (expatpt-expression)
-                  (parsec-eol-or-eof)))))
-    (unless (parsec-error-p res)
-      res)))
+  (car (expatpt--around-internal)))
+
+;;;###autoload
+(defun expatpt-around-eval ()
+  (interactive)
+  (let ((exp (expatpt-around))
+        result)
+    (when exp
+      (kill-new (setq result (calc-eval exp)))
+      (message "%s" result)
+      result)))
+
+;;;###autoload
+(defun expatpt-around-eval-and-replace ()
+  (interactive)
+  (let ((exp-list (expatpt--around-internal))
+        result)
+    (when exp-list
+      (kill-region (nth 1 exp-list) (nth 2 exp-list))
+      (insert (setq result (calc-eval (car exp-list))))
+      result)))
 
 (provide 'expatpt)
 ;;; expatpt.el ends here
