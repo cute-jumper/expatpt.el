@@ -84,7 +84,8 @@
 
 ;;   For convenience, two variants are provided:
 ;;   - `expatpt-around-eval': return the result of the arithmetic
-;;     expression
+;;     expression. The result is added to the kill-ring so you can paste if
+;;     needed.
 ;;   - `expatpt-around-eval-and-replace': get the result of the arithmetic
 ;;     expression and replace the expression with the result
 
