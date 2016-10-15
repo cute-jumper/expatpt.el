@@ -21,7 +21,82 @@
 
 ;;; Commentary:
 
-;;
+;; Junpeng Qiu
+
+
+;; Table of Contents
+;; _________________
+
+;; 1 expatpt (WIP)
+;; 2 Functions
+;; .. 2.1 `expatpt-around'
+;; 3 Dependencies
+
+
+;; 1 expatpt (WIP)
+;; ===============
+
+;;   expatpt: arithmetic EXPression AT PoinT
+
+;;   Grab the arithmetic expression around the cursor.
+
+;;   This package makes use of [parsec.el] to demonstrate a real-world use
+;;   case of this parser combinator library.
+
+;;   Note: This work is still *incomplete*.
+
+
+;; [parsec.el] https://github.com/cute-jumper/parsec.el
+
+
+;; 2 Functions
+;; ===========
+
+;; 2.1 `expatpt-around'
+;; ~~~~~~~~~~~~~~~~~~~~
+
+;;   `expatpt-around' would grab a valid arithmetic expression starting
+;;   somewhere before the cursor, and the ending of the expression may be
+;;   after or before the cursor since we will stop parsing the expression
+;;   as soon as it becomes invalid. So it may not behave exactly like a
+;;   traditional *thing-at-point* function. Let's see an example ( |
+;;   indicates the cursor position):
+
+;;   ,----
+;;   | This is text: 100+2e2-(8^2-|2) -
+;;   `----
+
+;;   Calling `expatpt-around' will return `100+2e2-(8^2-2)' since the
+;;   trailing `-' is not valid.
+
+;;   If the cursor is after `-' :
+
+;;   ,----
+;;   | This is text: 100+2e2-(8^2-2) -|
+;;   `----
+
+;;   it will still return the same result.
+
+;;   So what this function does is to parse a valid arithmetic expression
+;;   from a string, and this string forms by gathering all the digits and
+;;   arithmetic operators around the cursor. The cursor itself, may or may
+;;   not be inside the resulting valid arithmetic expression.
+
+;;   For convenience, two variants are provided:
+;;   - `expatpt-around-eval': return the result of the arithmetic
+;;     expression
+;;   - `expatpt-around-eval-and-replace': get the result of the arithmetic
+;;     expression and replace the expression with the result
+
+
+;; 3 Dependencies
+;; ==============
+
+;;   - [parsec.el]: parser combinator library for Emacs Lisp.
+;;   - calc: built-in library for arithmetic calculation
+
+
+;; [parsec.el] https://github.com/cute-jumper/parsec.el
 
 ;;; Code:
 
