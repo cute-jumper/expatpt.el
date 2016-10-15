@@ -39,9 +39,16 @@ Note: This work is still *incomplete*.
 
    For convenience, two variants are provided:
    - =expatpt-around-eval=: return the result of the arithmetic expression. The
-     result is added to the kill-ring so you can paste if needed.
+     result is added to the =kill-ring= so you can paste if needed.
+
+     In the above example, the function will put the result of
+     =100+2e2-(8^2-2)=, =238.=, into the =kill-ring= and shows it in the echo
+     area.
    - =expatpt-around-eval-and-replace=: get the result of the arithmetic
-     expression and replace the expression with the result
+     expression and replace the expression with the result.
+
+     In the above example, the function will replace =100+2e2-(8^2-2)= with
+     =238.=.
 
 * Dependencies
   - [[https://github.com/cute-jumper/parsec.el][parsec.el]]: parser combinator library for Emacs Lisp.
