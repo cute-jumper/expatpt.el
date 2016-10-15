@@ -110,6 +110,8 @@
     (while
         (looking-back expatpt-regexp nil t)
       (goto-char (match-beginning 0)))
+    (while (looking-at "[ ]+")
+      (goto-char (match-end 0)))
     (point)))
 
 (defun expatpt-find-ending ()
@@ -164,7 +166,6 @@
    (parsec-many-s (parsec-ch ? ))))
 
 (defun expatpt-exp ()
-  (parsec-many (parsec-ch ? ))
   (parsec-or
    (parsec-collect-s
     (expatpt-open-paren)
