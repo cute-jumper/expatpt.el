@@ -109,6 +109,7 @@
 ;;; Code:
 
 (require 'parsec)
+(require 'calc)
 
 (defvar expatpt-regexp "[0-9*+-/^ .()eE]+")
 
