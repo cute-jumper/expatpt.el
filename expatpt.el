@@ -218,13 +218,15 @@
 (defun expatpt ()
   (interactive)
   (let* ((beg (expatpt-find-beginning))
-         (end (expatpt-find-ending)))
-    (expatpt--internal beg end (point))))
+         (end (expatpt-find-ending))
+         (exp-list (expatpt--internal beg end (point))))
+    (and exp-list (car exp-list))))
 
 ;;;###autoload
 (defun expatpt-around ()
   (interactive)
-  (car (expatpt--around-internal)))
+  (let ((exp-list (expatpt--around-internal)))
+    (and exp-list (car exp-list))))
 
 ;;;###autoload
 (defun expatpt-around-eval ()
