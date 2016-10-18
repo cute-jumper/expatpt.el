@@ -190,6 +190,20 @@
       (expatpt-operator)
       (expatpt-exp))))))
 
+(defun expatpt--internal (beg end pt)
+  (when (< beg end)
+    (let* ((exp (buffer-substring-no-properties
+                 beg
+                 end))
+           (res (parsec-with-input exp
+                  (expatpt-parse)))
+           valid-exp-end)
+      (if (parsec-error-p res)
+          (expatpt--internal (1+ beg) end pt)
+        (if (< (setq valid-exp-end (+ beg (length res))) pt)
+            (expatpt--internal (1+ valid-exp-end) end pt)
+          (list res beg (+ beg (length res))))))))
+
 (defun expatpt--around-internal ()
   (let* ((beg (expatpt-find-beginning))
          (exp (buffer-substring-no-properties
@@ -199,6 +213,13 @@
                 (expatpt-parse))))
     (unless (parsec-error-p res)
       (list res beg (+ beg (length res))))))
+
+;;;###autoload
+(defun expatpt ()
+  (interactive)
+  (let* ((beg (expatpt-find-beginning))
+         (end (expatpt-find-ending)))
+    (expatpt--internal beg end (point))))
 
 ;;;###autoload
 (defun expatpt-around ()
