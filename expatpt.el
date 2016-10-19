@@ -204,65 +204,28 @@
             (expatpt--internal (1+ valid-exp-end) end pt)
           (list res beg (+ beg (length res))))))))
 
-(defun expatpt--around-internal ()
-  (let* ((beg (expatpt-find-beginning))
-         (exp (buffer-substring-no-properties
-               beg
-               (expatpt-find-ending)))
-         (res (parsec-with-input exp
-                (expatpt-parse))))
-    (unless (parsec-error-p res)
-      (list res beg (+ beg (length res))))))
-
-(defun expatpt--eval-with (func)
-  (let ((exp (funcall func))
-        result)
-    (when exp
-      (kill-new (setq result (calc-eval exp)))
-      (message "%s" result)
-      result)))
-
-(defun expatpt--eval-with-and-replace (func)
-  (let ((exp-list (funcall func))
-        result)
+(defun expatpt--eval-with (func &optional replace)
+  (let* ((exp-list (funcall func))
+         (exp (car exp-list))
+         result)
     (when exp-list
-      (kill-region (nth 1 exp-list) (nth 2 exp-list))
-      (insert (setq result (calc-eval (car exp-list))))
+      (kill-new (setq result (calc-eval exp)))
+      (message "%s => %s" exp result)
+      (when replace
+        (kill-region (nth 1 exp-list) (nth 2 exp-list))
+        (insert result))
       result)))
 
 ;;;###autoload
-(defun expatpt ()
-  (interactive)
+(defun expatpt-grab ()
   (let* ((beg (expatpt-find-beginning))
-         (end (expatpt-find-ending))
-         (exp-list (expatpt--internal beg end (point))))
-    (and exp-list (car exp-list))))
+         (end (expatpt-find-ending)))
+    (expatpt--internal beg end (point))))
 
 ;;;###autoload
-(defun expatpt-eval ()
-  (interactive)
-  (expatpt--eval-with #'expatpt))
-
-;;;###autoload
-(defun expatpt-eval-and-replace ()
-  (interactive)
-  (expatpt--eval-with-and-replace #'expatpt))
-
-;;;###autoload
-(defun expatpt-around ()
-  (interactive)
-  (let ((exp-list (expatpt--around-internal)))
-    (and exp-list (car exp-list))))
-
-;;;###autoload
-(defun expatpt-around-eval ()
-  (interactive)
-  (expatpt--eval-with #'expatpt-around))
-
-;;;###autoload
-(defun expatpt-around-eval-and-replace ()
-  (interactive)
-  (expatpt--eval-with-and-replace #'expatpt-around))
+(defun expatpt (&optional prefix)
+  (interactive "P")
+  (expatpt--eval-with #'expatpt-grab prefix))
 
 (provide 'expatpt)
 ;;; expatpt.el ends here
