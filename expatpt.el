@@ -214,6 +214,22 @@
     (unless (parsec-error-p res)
       (list res beg (+ beg (length res))))))
 
+(defun expatpt--eval-with (func)
+  (let ((exp (funcall func))
+        result)
+    (when exp
+      (kill-new (setq result (calc-eval exp)))
+      (message "%s" result)
+      result)))
+
+(defun expatpt--eval-with-and-replace (func)
+  (let ((exp-list (funcall func))
+        result)
+    (when exp-list
+      (kill-region (nth 1 exp-list) (nth 2 exp-list))
+      (insert (setq result (calc-eval (car exp-list))))
+      result)))
+
 ;;;###autoload
 (defun expatpt ()
   (interactive)
@@ -221,6 +237,16 @@
          (end (expatpt-find-ending))
          (exp-list (expatpt--internal beg end (point))))
     (and exp-list (car exp-list))))
+
+;;;###autoload
+(defun expatpt-eval ()
+  (interactive)
+  (expatpt--eval-with #'expatpt))
+
+;;;###autoload
+(defun expatpt-eval-and-replace ()
+  (interactive)
+  (expatpt--eval-with-and-replace #'expatpt))
 
 ;;;###autoload
 (defun expatpt-around ()
@@ -231,22 +257,12 @@
 ;;;###autoload
 (defun expatpt-around-eval ()
   (interactive)
-  (let ((exp (expatpt-around))
-        result)
-    (when exp
-      (kill-new (setq result (calc-eval exp)))
-      (message "%s" result)
-      result)))
+  (expatpt--eval-with #'expatpt-around))
 
 ;;;###autoload
 (defun expatpt-around-eval-and-replace ()
   (interactive)
-  (let ((exp-list (expatpt--around-internal))
-        result)
-    (when exp-list
-      (kill-region (nth 1 exp-list) (nth 2 exp-list))
-      (insert (setq result (calc-eval (car exp-list))))
-      result)))
+  (expatpt--eval-with-and-replace #'expatpt-around))
 
 (provide 'expatpt)
 ;;; expatpt.el ends here
