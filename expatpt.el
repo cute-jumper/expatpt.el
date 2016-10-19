@@ -27,81 +27,87 @@
 ;; Table of Contents
 ;; _________________
 
-;; 1 expatpt (WIP)
-;; 2 Functions
-;; .. 2.1 `expatpt-around'
-;; 3 Dependencies
+;; 1 expatpt
+;; 2 Command: `expatpt'
+;; 3 Function: `expatpt-grab'
+;; 4 The Supported Arithmetic Expression Syntax
+;; 5 TODO TODO
+;; 6 Dependencies
 
 
-;; 1 expatpt (WIP)
-;; ===============
+;; 1 expatpt
+;; =========
 
 ;;   expatpt: arithmetic EXPression AT PoinT
 
 ;;   Grab the arithmetic expression around the cursor.
 
-;;   This package makes use of [parsec.el] to demonstrate a real-world use
-;;   case of this parser combinator library.
-
-;;   Note: This work is still *incomplete*.
+;;   This package makes use of [parsec.el].
 
 
 ;; [parsec.el] https://github.com/cute-jumper/parsec.el
 
 
-;; 2 Functions
+;; 2 Command: `expatpt'
+;; ====================
+
+;;   This command grabs a *valid* arithmetic expression around the cursor,
+;;   evaluates the expression, puts the result in the `kill-ring' and shows
+;;   it in the echo area.
+
+;;   Example ( `|' indicates the cursor position):
+;;   ,----
+;;   | -+2|-4
+;;   `----
+
+;;   After invoking `expatpt', the echo area will show `+2-4 => -2', and
+;;   the result `-2' will be put into the `kill-ring' so you can paste it
+;;   whenever you want.
+
+;;   If `expatpt' is called with a prefix argument, it will also replace
+;;   the grabbed expression with its evaluation result in the buffer. The
+;;   expression itself will be put into the `kill-ring' so that it now
+;;   becomes the first item in the `kill-ring', followed by the evaluation
+;;   result.
+
+
+;; 3 Function: `expatpt-grab'
+;; ==========================
+
+;;   This function is not intended for interactive usage. It is used to
+;;   grab the *valid* arithmetic expression around the cursor. The return
+;;   value is a list containing three values. The first one is the string
+;;   of the expression, and the second and the third one are beginning and
+;;   ending postions of the expression in the current buffer. This
+;;   *thing-at-point* function can be used as a utility function to define
+;;   your own commands/functions.
+
+
+;; 4 The Supported Arithmetic Expression Syntax
+;; ============================================
+
+;;   For the time being, it is very simple. A number can be `+2', `2.6', or
+;;   `-2.0e2', and only addition(+), subtraction(-), multiplication(*),
+;;   division(/) and power(^) are supported.
+
+
+;; 5 TODO TODO
 ;; ===========
 
-;; 2.1 `expatpt-around'
-;; ~~~~~~~~~~~~~~~~~~~~
-
-;;   `expatpt-around' would grab a valid arithmetic expression starting
-;;   somewhere before the cursor, and the ending of the expression may be
-;;   after or before the cursor since we will stop parsing the expression
-;;   as soon as it becomes invalid. So it may not behave exactly like a
-;;   traditional *thing-at-point* function. Let's see an example ( |
-;;   indicates the cursor position):
-
-;;   ,----
-;;   | This is text: 100+2e2-(8^2-|2) -
-;;   `----
-
-;;   Calling `expatpt-around' will return `100+2e2-(8^2-2)' since the
-;;   trailing `-' is not valid.
-
-;;   If the cursor is after `-' :
-
-;;   ,----
-;;   | This is text: 100+2e2-(8^2-2) -|
-;;   `----
-
-;;   it will still return the same result.
-
-;;   So what this function does is to parse a valid arithmetic expression
-;;   from a string, and this string forms by gathering all the digits and
-;;   arithmetic operators around the cursor. The cursor itself, may or may
-;;   not be inside the resulting valid arithmetic expression.
-
-;;   For convenience, two variants are provided:
-;;   - `expatpt-around-eval': return the result of the arithmetic
-;;     expression. The result is added to the `kill-ring' so you can paste
-;;     if needed.
-
-;;     In the above example, the function will put the result of
-;;     `100+2e2-(8^2-2)', `238.', into the `kill-ring' and shows it in the
-;;     echo area.
-;;   - `expatpt-around-eval-and-replace': get the result of the arithmetic
-;;     expression and replace the expression with the result.
-
-;;     In the above example, the function will replace `100+2e2-(8^2-2)'
-;;     with `238.'.
+;;   I would like to make the arithmetic expression syntax mode-aware. For
+;;   example, it would be great if we add a parser for arithmetic
+;;   expression in \LaTeX{}.
 
 
-;; 3 Dependencies
+;; 6 Dependencies
 ;; ==============
 
 ;;   - [parsec.el]: parser combinator library for Emacs Lisp.
 ;;   - calc: built-in library for arithmetic calculation
+
+;;   Side note: since we have the parser for the arithmetic expression, we
+;;   actually don't need `calc'. But for convenience's sake, we use `calc'
+;;   to evaluate the arithmetic expression.
 
 
 ;; [parsec.el] https://github.com/cute-jumper/parsec.el
